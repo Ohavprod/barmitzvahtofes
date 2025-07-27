@@ -6,7 +6,7 @@ export async function handler(event, context) {
   try {
     const data = JSON.parse(event.body);
 
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzPReRiAnPWcID8Fmi8VJz_yQ5KSGmdIP_l4Bi9oL9dZ5Clf7AA9M6b-xsenHxi4bQvfA/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxS31_q2GCP0t16_nCl4y9YMwxldKFT6Auae8yxp_Hoj2WnVrUu-BxiLrwHNO11taW0Cg/exec';
 
     const response = await fetch(GAS_URL, {
       method: 'POST',
