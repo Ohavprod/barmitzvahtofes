@@ -218,28 +218,34 @@
             doc.text(`אישור פרסום: ${data.publishConsent}`, 40, y);
             y += 30;
 
-            // חתימה
             doc.text('חתימה:', 40, y);
             y += 10;
             doc.addImage(data.signature, 'PNG', 40, y, 150, 50);
 
-            // שמירת הקובץ למחשב
-            doc.save(`Contract_${data.firstName}_${data.lastName}.pdf`);
+            // כאן יוצרים Blob של ה-PDF
+            const pdfBlob = doc.output('blob');
 
-            // שליחת הנתונים ל-Netlify function
-            try {
-                const res = await fetch('/.netlify/functions/sendForm', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                });
-                const text = await res.text();
-                alert('הטופס נשלח בהצלחה!\n' + text);
-                clearCanvas();
-                e.target.reset();
-            } catch (err) {
-                alert('אירעה שגיאה בשליחת הטופס: ' + err.message);
-            }
+            // ממירים ל-Base64
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const base64data = reader.result.split(',')[1]; // מורידים את החלק הראשון
+                // שולחים לשרת
+                const payload = { ...data, pdfBase64: base64data };
+                try {
+                    const res = await fetch('/.netlify/functions/sendForm', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    });
+                    const text = await res.text();
+                    alert('הטופס נשלח בהצלחה!\n' + text);
+                    clearCanvas();
+                    e.target.reset();
+                } catch (err) {
+                    alert('אירעה שגיאה בשליחת הטופס: ' + err.message);
+                }
+            };
+            reader.readAsDataURL(pdfBlob);
         });
     </script>
 </body>
