@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>טופס חתימה - אביב ויצמן בר מצווה</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+        }
+        .signature-pad {
+            border: 2px dashed #d97706;
+            background: #fef3c7;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-r from-amber-400 via-orange-400 to-orange-600 p-6">
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
+        <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">טופס חתימה ואישור פרטים</h1>
+        <form id="contractForm" class="space-y-6" autocomplete="off">
+            <!-- פרטי הלקוח -->
+            <section class="bg-amber-50 p-5 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4 text-amber-800">פרטי הלקוח</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="firstName" placeholder="שם פרטי *" required
+                        class="p-3 border rounded-lg focus:ring-amber-500 focus:ring-2" />
+                    <input type="text" id="lastName" placeholder="שם משפחה *" required
+                        class="p-3 border rounded-lg focus:ring-amber-500 focus:ring-2" />
+                    <input type="tel" id="phone" placeholder="טלפון *" required
+                        class="p-3 border rounded-lg focus:ring-amber-500 focus:ring-2" />
+                    <input type="email" id="email" placeholder="כתובת מייל *" required
+                        class="p-3 border rounded-lg focus:ring-amber-500 focus:ring-2" />
+                </div>
+            </section>
+
+            <!-- פרטי האירוע -->
+            <section class="bg-orange-50 p-5 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4 text-orange-800">פרטי האירוע</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="date" id="eventDate" required
+                        class="p-3 border rounded-lg focus:ring-orange-500 focus:ring-2" />
+                    <input type="time" id="guestTime" required
+                        class="p-3 border rounded-lg focus:ring-orange-500 focus:ring-2" />
+                    <input type="time" id="eventTime" required
+                        class="p-3 border rounded-lg focus:ring-orange-500 focus:ring-2" />
+                    <input type="text" id="location" placeholder="מיקום האירוע *" required
+                        class="p-3 border rounded-lg focus:ring-orange-500 focus:ring-2" />
+                </div>
+            </section>
+
+            <!-- סוג חבילה -->
+            <section class="bg-yellow-50 p-5 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4 text-yellow-800">סוג חבילה</h2>
+                <div class="flex flex-col gap-3">
+                    <label class="cursor-pointer flex items-center gap-2">
+                        <input type="radio" name="package" value="בסיסית" required />
+                        חבילה בסיסית
+                    </label>
+                    <label class="cursor-pointer flex items-center gap-2">
+                        <input type="radio" name="package" value="חגיגית" required />
+                        חבילה חגיגית
+                    </label>
+                    <label class="cursor-pointer flex items-center gap-2">
+                        <input type="radio" name="package" value="הכל כלול" required />
+                        חבילת הכל כלול
+                    </label>
+                </div>
+            </section>
+
+            <!-- חתימת הלקוח -->
+            <section class="bg-amber-50 p-5 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4 text-amber-800">חתימת הלקוח</h2>
+                <canvas id="signaturePad" class="signature-pad w-full h-40 rounded-lg"></canvas>
+                <button type="button" id="clearSignature"
+                    class="mt-3 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">נקה חתימה</button>
+            </section>
+
+            <!-- דרכי תשלום -->
+            <section class="bg-orange-50 p-5 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4 text-orange-800">דרכי תשלום</h2>
+                <label class="cursor-pointer flex items-center gap-2">
+                    <input type="radio" name="payment" value="מזומן" required />
+                    מזומן
+                </label>
+                <label class="cursor-pointer flex items-center gap-2">
+                    <input type="radio" name="payment" value="העברה בנקאית" required />
+                    העברה בנקאית
+                </label>
+                <div class="mt-4 p-4 bg-white rounded border border-orange-300 text-gray-700">
+                    <p><strong>פרטי העברה בנקאית:</strong></p>
+                    <p>שם המוטב: אביב ויצמן</p>
+                    <p>בנק: אוצר החייל (14)</p>
+                    <p>סניף: 309</p>
+                    <p>מספר חשבון: 011620</p>
+                </div>
+            </section>
+
+            <!-- אישור פרסום -->
+            <section class="bg-amber-50 p-5 rounded-lg">
+                <label class="cursor-pointer flex items-start gap-2">
+                    <input type="checkbox" id="publishConsent" />
+                    <span>אני מאשר/ת לאביב ויצמן לפרסם תמונות ו/או וידאו מהאירוע באתר ובערוצי השיווק לצרכי פרסום</span>
+                </label>
+            </section>
+
+            <!-- כפתור שליחה -->
+            <div class="text-center">
+                <button type="submit"
+                    class="bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3 px-10 rounded-lg hover:from-amber-600 hover:to-orange-700 transition-transform transform hover:scale-105 shadow-lg">
+                    שלח טופס וצור PDF
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // הגדרות חתימה
+        const canvas = document.getElementById('signaturePad');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+        let hasSignature = false;
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * 2;
+            canvas.height = rect.height * 2;
+            ctx.scale(2, 2);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#d97706';
+            clearCanvas();
+        }
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hasSignature = false;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        canvas.addEventListener('mousedown', e => {
+            drawing = true;
+            hasSignature = true;
+            ctx.beginPath();
+            ctx.moveTo(e.offsetX, e.offsetY);
+        });
+        canvas.addEventListener('mousemove', e => {
+            if (!drawing) return;
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+        });
+        window.addEventListener('mouseup', e => {
+            if (drawing) drawing = false;
+        });
+
+        // נקה חתימה
+        document.getElementById('clearSignature').addEventListener('click', () => {
+            clearCanvas();
+        });
+
+        // טיפול בשליחה
+        document.getElementById('contractForm').addEventListener('submit', async e => {
+            e.preventDefault();
+
+            if (!hasSignature) {
+                alert('אנא חתום לפני השליחה');
+                return;
+            }
+
+            // איסוף נתונים
+            const data = {
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                eventDate: document.getElementById('eventDate').value,
+                guestTime: document.getElementById('guestTime').value,
+                eventTime: document.getElementById('eventTime').value,
+                location: document.getElementById('location').value.trim(),
+                package: document.querySelector('input[name="package"]:checked').value,
+                payment: document.querySelector('input[name="payment"]:checked').value,
+                publishConsent: document.getElementById('publishConsent').checked ? 'כן' : 'לא',
+                signature: canvas.toDataURL('image/png'),
+            };
+
+            // יצירת PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'pt' });
+            let y = 40;
+            doc.setFontSize(20);
+            doc.text('טופס חתימה - אביב ויצמן', 40, y);
+            y += 30;
+
+            doc.setFontSize(14);
+            doc.text(`שם פרטי: ${data.firstName}`, 40, y);
+            y += 20;
+            doc.text(`שם משפחה: ${data.lastName}`, 40, y);
+            y += 20;
+            doc.text(`טלפון: ${data.phone}`, 40, y);
+            y += 20;
+            doc.text(`מייל: ${data.email}`, 40, y);
+            y += 20;
+            doc.text(`תאריך אירוע: ${data.eventDate}`, 40, y);
+            y += 20;
+            doc.text(`שעת הגעה: ${data.guestTime}`, 40, y);
+            y += 20;
+            doc.text(`שעת תחילת האירוע: ${data.eventTime}`, 40, y);
+            y += 20;
+            doc.text(`מיקום האירוע: ${data.location}`, 40, y);
+            y += 20;
+            doc.text(`חבילה: ${data.package}`, 40, y);
+            y += 20;
+            doc.text(`תשלום: ${data.payment}`, 40, y);
+            y += 20;
+            doc.text(`אישור פרסום: ${data.publishConsent}`, 40, y);
+            y += 30;
+
+            // חתימה
+            doc.text('חתימה:', 40, y);
+            y += 10;
+            doc.addImage(data.signature, 'PNG', 40, y, 150, 50);
+
+            // שמירת הקובץ למחשב
+            doc.save(`Contract_${data.firstName}_${data.lastName}.pdf`);
+
+            // שליחת הנתונים ל-Netlify function
+            try {
+                const res = await fetch('/.netlify/functions/sendform', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+                const text = await res.text();
+                alert('הטופס נשלח בהצלחה!\n' + text);
+                clearCanvas();
+                e.target.reset();
+            } catch (err) {
+                alert('אירעה שגיאה בשליחת הטופס: ' + err.message);
+            }
+        });
+    </script>
+</body>
+</html>
