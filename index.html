@@ -228,7 +228,7 @@
 
             // שליחת הנתונים ל-Netlify function
             try {
-                const res = await fetch('/.netlify/functions/sendform', {
+                const res = await fetch('/.netlify/functions/sendForm', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data),
